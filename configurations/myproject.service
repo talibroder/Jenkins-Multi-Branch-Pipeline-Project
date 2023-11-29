@@ -1,0 +1,32 @@
+                                                                               
+[Unit]
+Description=Gunicorn instance to serve myproject
+After=network.target
+
+[Service]
+User=tali
+Group=www-data
+WorkingDirectory=/home/tali/Final_Project
+Environment="PATH=/home/tali/Final_Project/myprojectenv/bin"
+ExecStart=/home/tali/Final_Project/myprojectenv/bin/gunicorn --workers 3 --bind 127.0.0.1:5000 weather:app
+
+[Install]
+WantedBy=multi-user.target
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

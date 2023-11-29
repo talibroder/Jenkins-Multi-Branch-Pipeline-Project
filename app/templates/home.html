@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Weather app!</title>
+</head>
+
+<body style="background-color:powderblue;">
+    <h1 style="color:blue">Weather app!</h1>
+
+    <div>
+        <!-- Form for user input -->
+        <form method="post" action="{{ url_for('get_weather') }}">
+            <!-- Input field for the city with a default value if available -->
+            <input name="city" type="text" value="{{ request.form['city'] }}">
+            <!-- Submit button to trigger the form submission -->
+            <button type="submit">Search</button>
+        </form>
+    </div>
+</body>
+</html>
