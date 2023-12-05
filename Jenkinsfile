@@ -20,6 +20,15 @@ pipeline {
                     sh 'python3 --version'
                 }
         }
+        
+        stage('Unitest') {
+        	steps {
+                    sh 'python3 unitest.py'
+                }
+        }
+        
+        
+        
         stage('Push to DockerHub') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'docker_hub', passwordVariable: 'PSWD', usernameVariable: 'LOGIN')]) {
