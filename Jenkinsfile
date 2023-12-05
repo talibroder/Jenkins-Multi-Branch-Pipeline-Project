@@ -44,8 +44,8 @@ pipeline {
         post {
         
             success {
-                echo 'Pipeline successfully completed!'
-
+                echo 'Pipeline successfully completed!'  
+		slackSend color: '#36a64f', message: "Deployment of myapp to production succeeded!"
                 sh 'docker ps -a'
 
             }
@@ -53,6 +53,8 @@ pipeline {
                 echo 'Pipeline failed!'
                 sh 'docker container prune'
                 sh 'docker ps -a'
+                slackSend color: '#ff0000', message: "Deployment of myapp to production failed!"
+
 
             }
         }
