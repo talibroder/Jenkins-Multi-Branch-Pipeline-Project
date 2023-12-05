@@ -1,4 +1,5 @@
 pipeline {
+
     agent {
         label 'Agent My New Ubuntu 22.04 Node with Java and Docker'
     }
