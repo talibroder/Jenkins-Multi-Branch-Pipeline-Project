@@ -1,0 +1,8 @@
+dotenv-cli==2.0.1
+Flask==2.0.2
+itsdangerous==2.0.1
+Jinja2==3.0.3
+python-dotenv==1.0.0
+requests==2.22.0
+requests-unixsocket==0.2.0
+Werkzeug==2.0.2

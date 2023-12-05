@@ -1,41 +1,24 @@
-# Build Stage
-FROM python:3.9-slim AS build
+Use an official Python runtime as a parent image
+FROM python:3.9-slim
 
+Set the working directory in the container
 WORKDIR /app
 
-COPY requirements.txt .
-# Create a virtual environment and install dependencies
-RUN python -m venv /venv && \
-    /venv/bin/pip install --upgrade pip && \
-    /venv/bin/pip install --no-cache-dir -r requirements.txt
+Copy the current directory contents into the container at /app
+COPY . /app
 
-# Install Gunicorn in the virtual environment
-RUN /venv/bin/pip install gunicorn
+Install any needed packages specified in requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+Install Gunicorn
+RUN pip install gunicorn
 
-# Deploy Stage
-FROM python:3.9-slim AS deploy
+Make port 8000 available to the world outside this container
+EXPOSE 5000
+EXPOSE 8000
 
-# Copy virtual env from the build stage
-COPY --from=build /venv /venv
+Define environment variable
+ENV NAME World
 
-# Copy Python app from the build stage
-COPY --from=build /app /app
-
-# Install Nginx
-RUN apt-get update && apt-get install -y nginx && rm -rf /var/lib/apt/lists/*
-
-# Set working directory
-WORKDIR /app
-
-# Copy Nginx configuration
-COPY weather.conf /etc/nginx/conf.d/default.conf
-
-# Start script
-COPY start.sh /start.sh
-RUN chmod +x /start.sh
-
-EXPOSE 80
-
-CMD ["/start.sh"]
+Run the application
+CMD ["gunicorn", "app:app", "-b", "0.0.0.0:5000"]
