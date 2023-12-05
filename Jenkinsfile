@@ -18,7 +18,6 @@ pipeline {
                 steps {
                     sh 'docker run --rm -d -p 5000:5000 --name weather-app ${IMG_NAME}'
                     sh 'python3 --version'
-                    sh 'sudo docker kill weather-app'
                 }
         }
         stage('Push to DockerHub') {
@@ -38,11 +37,13 @@ pipeline {
                 echo 'Pipeline successfully completed!'
 
                 sh 'docker ps -a'
+                sh 'sudo docker kill weather-app'
             }
             failure {
                 echo 'Pipeline failed!'
                 sh 'docker container prune'
                 sh 'docker ps -a'
+                sh 'sudo docker kill weather-app'
             }
         }
 }
