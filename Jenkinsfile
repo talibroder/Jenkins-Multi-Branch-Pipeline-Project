@@ -1,7 +1,6 @@
 pipeline {
     agent {
-        label 'Agent My New Ubuntu 22.04 Node with Java and Docker
-'
+        label 'Agent My New Ubuntu 22.04 Node with Java and Docker'
     }
     environment {
         IMG_NAME = 'weather-app'
@@ -10,7 +9,7 @@ pipeline {
     stages {
         stage('Docker build') {
                 steps {
-                    sh 'docker build -t ${IMG_NAME} .'
+                    sh 'sudo docker build -t ${IMG_NAME} -f ./Dockerfile'
                 }
         }
 
@@ -18,7 +17,7 @@ pipeline {
                 steps {
                     sh 'docker run --rm -d -p 5000:5000 --name weather-app ${IMG_NAME}'
                     sh 'python3 --version'
-                    sh 'docker kill weather-app'
+                    sh 'sudo docker kill weather-app'
                 }
         }
         stage('Push to DockerHub') {
