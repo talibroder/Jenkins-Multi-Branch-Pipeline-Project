@@ -37,13 +37,13 @@ pipeline {
                 echo 'Pipeline successfully completed!'
 
                 sh 'docker ps -a'
-                sh 'sudo docker kill weather-app'
+
             }
             failure {
                 echo 'Pipeline failed!'
                 sh 'docker container prune'
                 sh 'docker ps -a'
-                sh 'sudo docker kill weather-app'
+
             }
         }
 }
