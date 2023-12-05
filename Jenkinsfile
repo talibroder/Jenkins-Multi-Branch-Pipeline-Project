@@ -1,6 +1,7 @@
 pipeline {
     agent {
-        label 'agent1'
+        label 'Agent My New Ubuntu 22.04 Node with Java and Docker
+'
     }
     environment {
         IMG_NAME = 'weather-app'
