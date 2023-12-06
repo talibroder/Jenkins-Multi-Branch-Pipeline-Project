@@ -12,22 +12,28 @@ pipeline {
     stages {
     
         stage('Docker build') {
+        steps {
                 sh 'sudo docker build -t ${IMG_NAME} .'
+                }
                 }
 
 	stage('Run Docker image and test') {
+	steps {
 		sh 'docker run --rm -d -p 5000:5000 --name weather-app ${IMG_NAME}'
 		sh 'python3 --version'
 		sh 'python3 unitest.py'
 		}
+		}
       
 	stage('Push to DockerHub') {
+	 script {
                 withCredentials([usernamePassword(credentialsId: 'docker_hub', passwordVariable: 'PSWD', usernameVariable: 'LOGIN')]) {
                 	sh 'docker tag ${IMG_NAME} ${DOCKER_REPO}:1.0.0'
                         sh 'echo ${PSWD} | docker login -u ${LOGIN} --password-stdin'
                         sh 'docker push ${DOCKER_REPO}:1.0.0'
               		}
               }	
+              }
           
 	stage('Deploy') {
           	withCredentials([sshUserPrivateKey(credentialsId: weather_app_ec2_instance, keyFileVariable: 'SSH_KEY_PATH')]) {
