@@ -39,5 +39,5 @@ def get_api(city):
     data = requests.get(url_path).json()
     return data
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)
 
