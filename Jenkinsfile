@@ -31,6 +31,7 @@ pipeline {
         }
       
 	stage('Push to DockerHub') {
+	steps {
 	 script {
                 withCredentials([usernamePassword(credentialsId: 'docker_hub', passwordVariable: 'PSWD', usernameVariable: 'LOGIN')]) {
                 	sh 'docker tag ${IMG_NAME} ${DOCKER_REPO}:1.0.0'
@@ -39,21 +40,26 @@ pipeline {
               		}
               }	
               }
+              }
           
 	}
    	 
 	post {
 		success {
+		script {
                     def buildNumber = currentBuild.number
                     slackSend(channel: 'succeeded-build', color: 'good', message: "Pipeline #${buildNumber} succeeded!")
                     sh 'yes | sudo docker container prune'
                 }
+                }
             
 		failure {
+		script {
                     def buildNumber = currentBuild.number
                     def errorMessage = currentBuild.result
                     slackSend(channel: 'devops-alerts', color: 'danger', message: "Pipeline #${buildNumber} failed with error: ${errorMessage}")
                     sh 'yes | sudo docker container prune'
+                }
                 }
 
         }
