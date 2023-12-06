@@ -4,7 +4,7 @@ FROM python:slim as builder
 
 WORKDIR /weather_app
 
-COPY . /weather_app/
+COPY . .
 
 RUN pip install --no-cache-dir --upgrade -r requirements.txt && rm -f requirements.txt
 
@@ -19,7 +19,7 @@ FROM builder
 WORKDIR /weather_app
 
 # Copy the application source code from the previous stage
-COPY --from=builder . /weather_app/
+COPY --from=builder . .
 
 EXPOSE 5000
 
