@@ -48,11 +48,8 @@ pipeline {
 	script {    
 	withCredentials([sshUserPrivateKey(credentialsId: 'ssh_ip', keyFileVariable: 'SSH_KEY_PATH')]) {
         // Now you can use the SSH private key securely
-        sh "ssh -o StrictHostKeyChecking=no -i ${SSH_KEY_PATH} ubuntu@51.20.233.205 'sudo docker pull talibro/weather:latest && sudo docker run -d -p 80:9090 talibro/weather'"
-
-
-                    }
-          
+        sh "ssh -o StrictHostKeyChecking=no -i ${SSH_KEY_PATH} ubuntu@51.20.233.205 'sudo docker pull talibro/weather:1.0.0 && sudo docker run -d -p 80:5000 talibro/weather'"
+                    } 
 	}
 	}
 	}
