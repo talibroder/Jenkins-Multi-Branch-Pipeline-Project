@@ -10,6 +10,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install gunicorn
 
 EXPOSE 5000
+
 EXPOSE 8000
 
 ENV NAME World
