@@ -36,26 +36,29 @@ pipeline {
                         sh 'docker tag ${IMG_NAME} ${DOCKER_REPO}:1.0.0'
                         sh 'echo ${PSWD} | docker login -u ${LOGIN} --password-stdin'
                         sh 'docker push ${DOCKER_REPO}:1.0.0'
-                    }
+                }
+              }
+            } 
+          }	
+   	 }
+	post{
+            success {
+                script{
+                    def buildNumber = currentBuild.number
+                    slackSend(channel: 'succeeded-build', color: 'good', message: "Pipeline #${buildNumber} succeeded!")
+                    sh 'sudo docker kill ${CONT_NAME}'
+                    sh 'yes | sudo docker container prune'
                 }
             }
-        }
-    }
-        post {
-        
-            success {
-                echo 'Pipeline successfully completed!'  
-		slackSend color: '#36a64f', message: "Deployment of myapp to production succeeded!"
-                sh 'docker ps -a'
-
-            }
             failure {
-                echo 'Pipeline failed!'
-                sh 'docker container prune'
-                sh 'docker ps -a'
-                slackSend color: '#ff0000', message: "Deployment of myapp to production failed!"
-
-
+                script {
+                    def buildNumber = currentBuild.number
+                    def errorMessage = currentBuild.result
+                    slackSend(channel: 'devops-alerts', color: 'danger', message: "Pipeline #${buildNumber} failed with error: ${errorMessage}")
+                    sh 'sudo docker kill ${CONT_NAME}'
+                    sh 'yes | sudo docker container prune'
+                }
             }
+
         }
-}
+        }
