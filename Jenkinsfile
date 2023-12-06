@@ -15,7 +15,8 @@ pipeline {
         stage('Docker build') {
         	steps {
 			script {
-                    	docker.build("${IMG_NAME}")
+        		sh 'sudo docker build -t ${IMG_NAME} .'
+
                 }
             }
         }
