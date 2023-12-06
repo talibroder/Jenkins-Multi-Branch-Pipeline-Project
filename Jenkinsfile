@@ -47,7 +47,6 @@ pipeline {
                 script{
                     def buildNumber = currentBuild.number
                     slackSend(channel: 'succeeded-build', color: 'good', message: "Pipeline #${buildNumber} succeeded!")
-                    sh 'sudo docker kill ${CONT_NAME}'
                     sh 'yes | sudo docker container prune'
                 }
             }
@@ -56,7 +55,6 @@ pipeline {
                     def buildNumber = currentBuild.number
                     def errorMessage = currentBuild.result
                     slackSend(channel: 'devops-alerts', color: 'danger', message: "Pipeline #${buildNumber} failed with error: ${errorMessage}")
-                    sh 'sudo docker kill ${CONT_NAME}'
                     sh 'yes | sudo docker container prune'
                 }
             }
