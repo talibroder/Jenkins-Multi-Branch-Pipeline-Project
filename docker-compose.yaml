@@ -17,12 +17,12 @@ services:
     image: "nginx:alpine"
     container_name: "nginx_weather"
     ports:
-      "80:80"
+      - "80:80"
     networks:
       - weather
-      
     volumes:
-     - /tmp/nginx.conf:/etc/nginx/conf.d/default.conf
+      - /tmp/nginx.conf:/etc/nginx/conf.d/default.conf
 
 networks:
   weather:
+
