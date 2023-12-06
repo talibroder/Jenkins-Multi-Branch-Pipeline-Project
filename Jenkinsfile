@@ -7,23 +7,28 @@ pipeline {
     environment {
         IMG_NAME = 'weather-app'
         DOCKER_REPO = 'talibro/weather'
+        
     }
     
     stages {
     
         stage('Docker build') {
-        steps {
-                sh 'sudo docker build -t ${IMG_NAME} .'
+        	steps {
+			script {
+                    	docker.build("${IMG_NAME}")
                 }
-                }
+            }
+        }
 
 	stage('Run Docker image and test') {
 	steps {
+	script {
 		sh 'docker run --rm -d -p 5000:5000 --name weather-app ${IMG_NAME}'
-		sh 'python3 --version'
-		sh 'python3 unitest.py'
-		}
-		}
+                sh 'python3 --version'
+                sh 'python3 unitest.py'
+                }
+            }
+        }
       
 	stage('Push to DockerHub') {
 	 script {
