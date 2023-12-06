@@ -23,9 +23,10 @@ pipeline {
 	stage('Run Docker image and test') {
 	steps {
 	script {
-		sh 'docker run --rm -d -p 5010:5000 --name weather ${IMG_NAME}'
+		sh 'docker run --rm -d -p 5010:5000 --name weather_app ${IMG_NAME}'
                 sh 'python3 --version'
                 sh 'python3 unitest.py'
+                
                 }
             }
         }
@@ -61,7 +62,9 @@ pipeline {
 		script {
                     def buildNumber = currentBuild.number
                     slackSend(channel: 'succeeded-build', color: 'good', message: "Pipeline #${buildNumber} succeeded!")
+                    sh 'sudo docker kill weather_app'
                     sh 'yes | sudo docker container prune'
+
                 }
                 }
             
@@ -70,6 +73,7 @@ pipeline {
                     def buildNumber = currentBuild.number
                     def errorMessage = currentBuild.result
                     slackSend(channel: 'devops-alerts', color: 'danger', message: "Pipeline #${buildNumber} failed with error: ${errorMessage}")
+                    sh 'sudo docker kill weather_app'
                     sh 'yes | sudo docker container prune'
                 }
                 }
