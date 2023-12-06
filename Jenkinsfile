@@ -13,11 +13,10 @@ pipeline {
     stages {
     
         stage('Docker build') {
-        	steps {
-			script {
-        		sh 'sudo docker build -t ${IMG_NAME} .'
-
-                }
+        steps {
+	script {
+        	sh 'sudo docker build -t ${IMG_NAME} .'
+               }
             }
         }
 
@@ -33,16 +32,28 @@ pipeline {
       
 	stage('Push to DockerHub') {
 	steps {
-	 script {
+	script {
                 withCredentials([usernamePassword(credentialsId: 'docker_hub', passwordVariable: 'PSWD', usernameVariable: 'LOGIN')]) {
-                	sh 'docker tag ${IMG_NAME} ${DOCKER_REPO}:1.0.0'
+                        def buildNumber = currentBuild.number
+                	sh 'docker tag ${IMG_NAME} ${DOCKER_REPO}:${buildNumber}'
                         sh 'echo ${PSWD} | docker login -u ${LOGIN} --password-stdin'
                         sh 'docker push ${DOCKER_REPO}:${appVersion}'
               		}
               }	
               }
               }
+              
+        stage('Deploy') {
+	steps {
+	script {    
+	withCredentials([sshUserPrivateKey(credentialsId: 'ssh_ip', keyFileVariable: 'SSH_KEY_PATH')]) {
+                        // Now you can use the SSH private key securely
+                        sh "ssh -o StrictHostKeyChecking=no -i ${SSH_KEY_PATH} ubuntu@51.20.233.205
+                        'sudo docker pull talibro/weather:${buildNumber} && sudo docker run -d -p 80:9090 talibro/weather'"
+                    }
           
+	}
+	}
 	}
    	 
 	post {
