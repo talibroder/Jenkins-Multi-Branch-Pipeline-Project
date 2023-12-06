@@ -23,7 +23,7 @@ pipeline {
 	stage('Run Docker image and test') {
 	steps {
 	script {
-		sh 'docker run --rm -d -p 5010:5000 --name weather_app ${IMG_NAME}'
+		sh 'docker run --rm -d -p 80:80 --name weather_app ${IMG_NAME}'
                 sh 'python3 --version'
                 sh 'python3 unitest.py'
                 
