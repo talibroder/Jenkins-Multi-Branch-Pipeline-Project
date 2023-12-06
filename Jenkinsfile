@@ -40,12 +40,6 @@ pipeline {
               }	
               }
           
-	stage('Deploy') {
-          	withCredentials([sshUserPrivateKey(credentialsId: weather_app_ec2_instance, keyFileVariable: 'SSH_KEY_PATH')]) {
-                // Now you can use the SSH private key securely
-                sh "ssh -i $SSH_KEY_PATH ubuntu@3.211.55.50 'c419ebdcdd2a'"
-                    }
-       		}   
 	}
    	 
 	post {
