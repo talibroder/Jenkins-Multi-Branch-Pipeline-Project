@@ -1,3 +1,6 @@
+version: "3"
+
+services:
   web1:
     image: "talibro/weather:1.0.0"
     container_name: "weather_app1"
