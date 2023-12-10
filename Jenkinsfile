@@ -46,7 +46,9 @@ pipeline {
               
         stage('Deploy') {
 	steps {
-	script {    
+	script {
+	sudo scp -i /home/tali/talibroder.pem nginx.conf ubuntu@51.20.233.205:/home/ubuntu
+        sudo scp -i /home/tali/talibroder.pem docker-compose.yaml ubuntu@51.20.233.205:/home/ubuntu
 	withCredentials([sshUserPrivateKey(credentialsId: 'ssh_ip', keyFileVariable: 'SSH_KEY_PATH')]) {
         // Now you can use the SSH private key securely
         sh "ssh -o StrictHostKeyChecking=no -i ${SSH_KEY_PATH} ubuntu@51.20.233.205 'cd /home/ubuntu && docker pull ${DOCKER_REPO}:1.0.0 && sudo docker-compose up -d'"
