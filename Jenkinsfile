@@ -30,6 +30,15 @@ pipeline {
                 }
             }
         }
+        
+        stage('Run Tests') {
+        steps {
+        // Run Selenium tests
+        script {
+               sh 'python3 selenium_location.py'
+               }
+             }
+             }
       
 	stage('Push to DockerHub') {
 	steps {
