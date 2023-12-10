@@ -4,12 +4,6 @@
     networks:
       - weather
 
-  web2:
-    image: "talibro/weather:1.0.0"
-    container_name: "weather_app2"
-    networks:
-      - weather
-
   nginx:
     image: "nginx:alpine"
     container_name: "nginx_weather"
