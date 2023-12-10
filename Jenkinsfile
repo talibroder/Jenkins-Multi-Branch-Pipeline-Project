@@ -35,6 +35,7 @@ pipeline {
         steps {
         // Run Selenium tests
         script {
+               sh 'pip install selenium'
                sh 'python3 selenium_location.py'
                }
              }
