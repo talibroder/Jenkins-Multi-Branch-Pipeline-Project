@@ -7,7 +7,7 @@ def home():
     """
     Render the home page.
     """
-    return render_template("home.html")
+    return render_template("home.html"),200
 @app.route("/city", methods=["GET", "POST"])
 def get_weather():
     """
@@ -20,7 +20,7 @@ def get_weather():
             days = data['days'][:7]
             state = data['resolvedAddress']
             return render_template("search_result.html",
-                                   day=days, city=city, state=state)
+                                   day=days, city=city, state=state),200
         except:
             return "Invalid City. Go back and try again."
 def get_api(city):

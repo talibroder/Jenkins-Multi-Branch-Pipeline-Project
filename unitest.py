@@ -14,3 +14,5 @@ class TestSiteAvialble(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+    
+#If there's an issue with the URL or if the response status code is not 200, the test will fail and the specified error message will be displayed
