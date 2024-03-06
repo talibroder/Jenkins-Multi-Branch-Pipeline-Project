@@ -1,6 +1,6 @@
 # Stage 1: Build stage
 
-FROM python:slim as builder
+FROM python:3.9-slim as builder
 
 WORKDIR /weather_app
 
