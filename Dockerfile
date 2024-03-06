@@ -1,4 +1,4 @@
-# Stage 1: Build stag
+# Stage 1: Build stage
 
 FROM python:3.9-slim as builder
 
