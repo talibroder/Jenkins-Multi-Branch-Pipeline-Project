@@ -45,6 +45,8 @@ pipeline {
 	script {
                 withCredentials([usernamePassword(credentialsId: 'docker_hub', passwordVariable: 'PSWD', usernameVariable: 'LOGIN')]) {
                         def buildNumber = currentBuild.number
+                        echo "Build Number: ${buildNumber}"
+
                 	sh 'docker tag ${IMG_NAME} ${DOCKER_REPO}:${buildNumber}'
                         sh 'echo ${PSWD} | docker login -u ${LOGIN} --password-stdin'
                         sh 'docker push ${DOCKER_REPO}:${buildNumber}'
