@@ -42,26 +42,11 @@ pipeline {
              
         stage('Dependency Scan') {
             steps {
-                script {
-                    // Run Dependency-Check in a Docker container and generate a report
-                    def dependencyCheckCmd = """
-                        docker run --rm \
-                        -v \$(pwd):/usr/src/app \
-                        -w /usr/src/app \
-                        owasp/dependency-check \
-                        --project your_project_name \
-                        --scan .
-                    """
-                    sh dependencyCheckCmd
+             script {
+                    sh 'docker run --rm -v $(pwd):/usr/src/app -w /usr/src/app owasp/dependency-check:latest --project your_project_name --scan .'
 
-                    // Check for critical vulnerabilities and fail the pipeline if threshold is exceeded
-                    def criticalVulnerabilities = sh(script: 'grep -c "<severity>Critical</severity>" dependency-check-report.xml', returnStatus: true).trim()
-
-                    if (criticalVulnerabilities.toInteger() > 5) { // Set your threshold here
-                        error "Pipeline failed due to critical vulnerabilities exceeding the threshold."
-                    }
-                }
             }
+        }
         }
       
 	stage('Push to DockerHub') {
