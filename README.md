@@ -1,93 +1,219 @@
-# weather
+<p align="center">
+  <img src="docs/imgs/logo.png" width="200">
+</p>
+
+<p align="center">
+  <a href="https://aquasecurity.github.io/trivy/">Documentation</a> 
+</p>
+
+<p align="center">
+Scanner for vulnerabilities in container images, file systems, and Git repositories, as well as for configuration issues
+</p>
+
+[![GitHub Release][release-img]][release]
+[![Test][test-img]][test]
+[![Go Report Card][go-report-img]][go-report]
+[![License: Apache-2.0][license-img]][license]
+[![GitHub All Releases][github-all-releases-img]][release]
+![Docker Pulls][docker-pulls]
 
 
+# Abstract
+`Trivy` (`tri` pronounced like **tri**gger, `vy` pronounced like en**vy**) is a simple and comprehensive scanner for vulnerabilities in container images, file systems, and Git repositories, as well as for configuration issues.
+`Trivy` detects vulnerabilities of OS packages (Alpine, RHEL, CentOS, etc.) and language-specific packages (Bundler, Composer, npm, yarn, etc.).
+In addition, `Trivy` scans Infrastructure as Code (IaC) files such as Terraform, Dockerfile and Kubernetes, to detect potential configuration issues that expose your deployments to the risk of attack.
+`Trivy` is easy to use. Just install the binary and you're ready to scan.
 
-## Getting started
+<p align="center">
+  <img src="docs/imgs/overview.png" width="800" alt="Trivy Overview">
+</p>
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+### Demo: Vulnerability Detection (Container Image)
+<p align="center">
+  <img src="docs/imgs/vuln-demo.gif" width="1000" alt="Vulnerability Detection">
+</p>
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+### Demo: Misconfiguration Detection (IaC Files)
+<p align="center">
+  <img src="docs/imgs/misconf-demo.gif" width="1000" alt="Misconfiguration Detection">
+</p>
 
-## Add your files
-
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+# Quick Start
+## Scan Image for Vulnerabilities
+Simply specify an image name (and a tag).
 
 ```
-cd existing_repo
-git remote add origin http://51.20.207.150/root/weather.git
-git branch -M main
-git push -uf origin main
+$ trivy image [YOUR_IMAGE_NAME]
 ```
 
-## Integrate with your tools
+For example:
 
-- [ ] [Set up project integrations](http://51.20.207.150/root/weather/-/settings/integrations)
+```
+$ trivy image python:3.4-alpine
+```
 
-## Collaborate with your team
+<details>
+<summary>Result</summary>
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+```
+2019-05-16T01:20:43.180+0900    INFO    Updating vulnerability database...
+2019-05-16T01:20:53.029+0900    INFO    Detecting Alpine vulnerabilities...
 
-## Test and Deploy
+python:3.4-alpine3.9 (alpine 3.9.2)
+===================================
+Total: 1 (UNKNOWN: 0, LOW: 0, MEDIUM: 1, HIGH: 0, CRITICAL: 0)
 
-Use the built-in continuous integration in GitLab.
++---------+------------------+----------+-------------------+---------------+--------------------------------+
+| LIBRARY | VULNERABILITY ID | SEVERITY | INSTALLED VERSION | FIXED VERSION |             TITLE              |
++---------+------------------+----------+-------------------+---------------+--------------------------------+
+| openssl | CVE-2019-1543    | MEDIUM   | 1.1.1a-r1         | 1.1.1b-r1     | openssl: ChaCha20-Poly1305     |
+|         |                  |          |                   |               | with long nonces               |
++---------+------------------+----------+-------------------+---------------+--------------------------------+
+```
+</details>
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+## Scan Filesystem for Vulnerabilities and Misconfigurations
+Simply specify a directory to scan.
 
-***
+```bash
+$ trivy fs --security-checks vuln,config [YOUR_PROJECT_DIR]
+```
 
-# Editing this README
+For example:
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+```bash
+$ trivy fs --security-checks vuln,config myproject/
+```
 
-## Suggestions for a good README
+<details>
+<summary>Result</summary>
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+```bash
+2021-07-09T12:03:27.564+0300    INFO    Number of language-specific files: 1
+2021-07-09T12:03:27.564+0300    INFO    Detecting pipenv vulnerabilities...
+2021-07-09T12:03:27.566+0300    INFO    Detected config files: 1
 
-## Name
-Choose a self-explaining name for your project.
+Pipfile.lock (pipenv)
+=====================
+Total: 1 (HIGH: 1, CRITICAL: 0)
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
++----------+------------------+----------+-------------------+---------------+---------------------------------------+
+| LIBRARY  | VULNERABILITY ID | SEVERITY | INSTALLED VERSION | FIXED VERSION |                 TITLE                 |
++----------+------------------+----------+-------------------+---------------+---------------------------------------+
+| httplib2 | CVE-2021-21240   | HIGH     | 0.12.1            | 0.19.0        | python-httplib2: Regular              |
+|          |                  |          |                   |               | expression denial of                  |
+|          |                  |          |                   |               | service via malicious header          |
+|          |                  |          |                   |               | -->avd.aquasec.com/nvd/cve-2021-21240 |
++----------+------------------+----------+-------------------+---------------+---------------------------------------+
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+Dockerfile (dockerfile)
+=======================
+Tests: 23 (SUCCESSES: 22, FAILURES: 1, EXCEPTIONS: 0)
+Failures: 1 (HIGH: 1, CRITICAL: 0)
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
++---------------------------+------------+----------------------+----------+------------------------------------------+
+|           TYPE            | MISCONF ID |        CHECK         | SEVERITY |                 MESSAGE                  |
++---------------------------+------------+----------------------+----------+------------------------------------------+
+| Dockerfile Security Check |   DS002    | Image user is 'root' |   HIGH   | Last USER command in                     |
+|                           |            |                      |          | Dockerfile should not be 'root'          |
+|                           |            |                      |          | -->avd.aquasec.com/appshield/ds002       |
++---------------------------+------------+----------------------+----------+------------------------------------------+
+```
+</details>
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+## Scan Directory for Misconfigurations
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+Simply specify a directory containing IaC files such as Terraform and Dockerfile.
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+```
+$ trivy config [YOUR_IAC_DIR]
+```
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+For example:
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+```
+$ ls build/
+Dockerfile
+$ trivy config ./build
+```
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+<details>
+<summary>Result</summary>
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+```
+2021-07-09T10:06:29.188+0300    INFO    Need to update the built-in policies
+2021-07-09T10:06:29.188+0300    INFO    Downloading the built-in policies...
+2021-07-09T10:06:30.520+0300    INFO    Detected config files: 1
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+Dockerfile (dockerfile)
+=======================
+Tests: 23 (SUCCESSES: 22, FAILURES: 1, EXCEPTIONS: 0)
+Failures: 1 (UNKNOWN: 0, LOW: 0, MEDIUM: 0, HIGH: 1, CRITICAL: 0)
 
-## License
-For open source projects, say how it is licensed.
++---------------------------+------------+----------------------+----------+------------------------------------------+
+|           TYPE            | MISCONF ID |        CHECK         | SEVERITY |                 MESSAGE                  |
++---------------------------+------------+----------------------+----------+------------------------------------------+
+| Dockerfile Security Check |   DS002    | Image user is 'root' |   HIGH   | Last USER command in                     |
+|                           |            |                      |          | Dockerfile should not be 'root'          |
+|                           |            |                      |          | -->avd.aquasec.com/appshield/ds002       |
++---------------------------+------------+----------------------+----------+------------------------------------------+
+```
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+</details>
+
+
+# Features
+
+- Comprehensive vulnerability detection
+  - OS packages (Alpine Linux, Red Hat Universal Base Image, Red Hat Enterprise Linux, CentOS, Oracle Linux, Debian, Ubuntu, Amazon Linux, openSUSE Leap, SUSE Enterprise Linux, Photon OS and Distroless)
+  - **Language-specific packages** (Bundler, Composer, Pipenv, Poetry, npm, yarn, Cargo, NuGet, Maven, and Go)
+- Misconfiguration detection (IaC scanning) 
+  - A wide variety of built-in policies are provided **out of the box**
+    - Kubernetes, Docker, Terraform, and more coming soon
+  - Support custom policies
+- Simple
+  - Specify only an image name, a path to config files, or an artifact name
+- Fast
+  - The first scan will finish within 10 seconds (depending on your network). Consequent scans will finish in single seconds.
+- Easy installation
+  - `apt-get install`, `yum install` and `brew install` are possible.
+  - **No pre-requisites** such as installation of DB, libraries, etc.
+- High accuracy
+  - **Especially [Alpine Linux][alpine] and RHEL/CentOS**
+  - Other OSes are also high
+- DevSecOps
+  - **Suitable for CI** such as GitHub Actions, Jenkins, GitLab CI, etc.
+- Support multiple targets
+  - container image, local filesystem and remote git repository
+
+# Integrations
+- [GitHub Actions][action]
+- [Visual Studio Code][vscode]
+
+# Documentation
+The official documentation, which provides detailed installation, configuration, and quick start guides, is available at https://aquasecurity.github.io/trivy/.
+
+---
+
+Trivy is an [Aqua Security][aquasec] open source project.  
+Learn about our open source work and portfolio [here][oss].  
+Contact us about any matter by opening a GitHub Discussion [here][discussions]
+
+[test]: https://github.com/aquasecurity/trivy/actions/workflows/test.yaml
+[test-img]: https://github.com/aquasecurity/trivy/actions/workflows/test.yaml/badge.svg
+[go-report]: https://goreportcard.com/report/github.com/aquasecurity/trivy
+[go-report-img]: https://goreportcard.com/badge/github.com/aquasecurity/trivy
+[release]: https://github.com/aquasecurity/trivy/releases
+[release-img]: https://img.shields.io/github/release/aquasecurity/trivy.svg?logo=github
+[github-all-releases-img]: https://img.shields.io/github/downloads/aquasecurity/trivy/total?logo=github
+[docker-pulls]: https://img.shields.io/docker/pulls/aquasec/trivy?logo=docker&label=docker%20pulls%20%2F%20trivy
+[license]: https://github.com/aquasecurity/trivy/blob/main/LICENSE
+[license-img]: https://img.shields.io/badge/License-Apache%202.0-blue.svg
+
+[alpine]: https://ariadne.space/2021/06/08/the-vulnerability-remediation-lifecycle-of-alpine-containers/
+[action]: https://github.com/aquasecurity/trivy-action
+[vscode]: https://github.com/aquasecurity/trivy-vscode-extension
+
+[aquasec]: https://aquasec.com
+[oss]: https://www.aquasec.com/products/open-source-projects/
+[discussions]: https://github.com/aquasecurity/trivy/discussions
