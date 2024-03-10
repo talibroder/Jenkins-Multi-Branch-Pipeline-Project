@@ -39,16 +39,7 @@ pipeline {
                }
              }
              }
-             
-        stage('Dependency Scan') {
-            steps {
-             script {
-                    sh 'docker run --rm -v $(pwd):/usr/src/app -w /usr/src/app owasp/dependency-check:latest --project your_project_name --scan .'
 
-            }
-        }
-        }
-      
 	stage('Push to DockerHub') {
 	steps {
 	script {
