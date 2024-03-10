@@ -14,6 +14,8 @@ pipeline {
         stage('Docker build') {
         steps {
 	script {
+	        sh 'sudo docker kill weather_app'
+                sh 'yes | sudo docker container prune'
         	sh 'sudo docker build -t ${IMG_NAME} .'
                }
             }
@@ -62,9 +64,9 @@ pipeline {
 	script {
 
 	withCredentials([sshUserPrivateKey(credentialsId: 'ssh_ip', keyFileVariable: 'SSH_KEY_PATH')]) {
-	sh "scp -o StrictHostKeyChecking=no -i ${SSH_KEY_PATH} nginx.conf ubuntu@51.20.233.205:/home/ubuntu"
-        sh "scp -o StrictHostKeyChecking=no -i ${SSH_KEY_PATH} docker-compose.yaml ubuntu@51.20.233.205:/home/ubuntu"
-        sh "ssh -o StrictHostKeyChecking=no -i ${SSH_KEY_PATH} ubuntu@51.20.233.205 'cd /home/ubuntu && docker pull ${DOCKER_REPO}:1.0.0 && sudo docker-compose up -d'"
+	sh "scp -o StrictHostKeyChecking=no -i ${SSH_KEY_PATH} nginx.conf ubuntu@16.171.230.105:/home/ubuntu"
+        sh "scp -o StrictHostKeyChecking=no -i ${SSH_KEY_PATH} docker-compose.yaml ubuntu@16.171.230.105:/home/ubuntu"
+        sh "ssh -o StrictHostKeyChecking=no -i ${SSH_KEY_PATH} ubuntu@16.171.230.105 'cd /home/ubuntu && docker pull ${DOCKER_REPO}:1.0.0 && sudo docker-compose up -d'"
                     } 
 	}
 	}
