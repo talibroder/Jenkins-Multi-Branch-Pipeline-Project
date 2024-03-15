@@ -17,7 +17,7 @@ pipeline {
                 		script {
                 			// Download versioning.txt from S3
                 			echo "doneeee"
-                			sh 'aws s3 cp s3://app-versioning/versioning.txt versioning.txt'
+                			sh 'aws s3 cp s3://tali1992/versioning.txt versioning.txt'
 
                 			// Read the content of versioning.txt
                 			def s3Content = readFile 'versioning.txt'
