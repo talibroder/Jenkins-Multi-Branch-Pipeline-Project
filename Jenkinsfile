@@ -13,7 +13,7 @@ pipeline {
 	stages {
 		stage('Read Version from S3') {	
             		steps {
-            			withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'tali-admin-aws', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+            			withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'talibr-admin-aws', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
                 		script {
                 			// Download versioning.txt from S3
                 			echo "done"
