@@ -16,6 +16,7 @@ pipeline {
             			withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'tali-admin-aws', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
                 		script {
                 			// Download versioning.txt from S3
+                			echo "done"
                 			sh 'aws s3 cp s3://app-versioning/versioning.txt versioning.txt'
 
                 			// Read the content of versioning.txt
