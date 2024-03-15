@@ -1,27 +1,48 @@
 pipeline {
 
-    agent {
-        label 'My New Ubuntu 22.04 Node with Java and Docker'
-    }
+	agent {
+		label 'Agent1'
+	}
     
-    environment {
-        IMG_NAME = 'weather'
+	environment {
+	IMG_NAME = 'weather'
         DOCKER_REPO = 'talibro/weather'
-        
-    }
+        CONT_NAME='Weatherapp'
+	}
     
-    stages {
-        stage('Docker build') {
-        steps {
-	script {
-	        sh 'sudo docker kill weather_app'
-                sh 'yes | sudo docker container prune'
-        	sh 'sudo docker build -t ${IMG_NAME} .'
-               }
-            }
-        }
+	stages {
+		stage('Read Version from S3') {	
+            		steps {
+            			withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'tali-admin-aws', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+                		script {
+                			// Download versioning.txt from S3
+                			sh 'aws s3 cp s3://app-versioning/versioning.txt versioning.txt'
 
-	stage('Run Docker image and test') {
+                			// Read the content of versioning.txt
+                			def s3Content = readFile 'versioning.txt'
+
+                			// Split the content by dot ('.')
+                			def versionParts = s3Content.split('\\.')
+
+                			// Set each part as an environment variable
+                			env.MAJOR = versionParts[0].trim().toInteger()
+                			env.MINOR = versionParts[1].trim().toInteger()
+                			env.PATCH = versionParts[2].trim().toInteger()
+                		}
+               			}
+            		}
+        	}
+		stage('Smoke test') {
+			when {branch 'develop'}
+			steps {
+				script {
+
+					sh 'sudo docker build -t ${IMG_NAME} .'
+					}
+				}
+		}
+
+		stage('Run Docker image and test') {
 	steps {
 	script {
 		sh 'docker run --rm -d -p 80:80 --name weather_app ${IMG_NAME}'
