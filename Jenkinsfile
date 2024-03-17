@@ -39,10 +39,14 @@ pipeline {
 			when {branch 'develop'}
 			steps {
 				script {
-
-					sh 'sudo docker build -t ${IMG_NAME}:${MAJOR}.${MINOR}.${PATCH} -f ./Dockerfile .'
-					sh 'sudo docker run --rm -d -p 5000:5000 --name ${CONT_NAME} ${IMG_NAME}:${MAJOR}.${MINOR}.${PATCH}'
-            				sh 'python3 unitest.py'
+				
+					sh '''
+						sudo docker build -t ${IMG_NAME}:${MAJOR}.${MINOR}.${PATCH} -f ./Dockerfile . \
+						sudo docker run --rm -d -p 5000:5000 --name ${CONT_NAME} ${IMG_NAME}:${MAJOR}.${MINOR}.${PATCH} \
+            					python3 unitest.py
+            					
+            				'''
+            				
 					}
 				}
 		}
@@ -51,11 +55,12 @@ pipeline {
 			when {branch 'hotfix'}
 			steps {
 				script {
+				
 				        sh '''
-            					PATCH=$((PATCH + 1))
-                				echo ${PATCH}
-                				echo "${MAJOR}.${MINOR}.${PATCH}" > versioning.txt
-                				cat versioning.txt
+            					PATCH=$((PATCH + 1)) \
+                				echo ${PATCH} \
+                				echo "${MAJOR}.${MINOR}.${PATCH}" > versioning.txt \
+                				cat versioning.txt \
 	
                     			'''
 				}
@@ -66,11 +71,13 @@ pipeline {
 			when {branch 'feature'}
 			steps {
 				script {
+				
 				        sh '''
                     				sudo docker build -t ${IMG_NAME}:${MAJOR}.${MINOR}.${PATCH} -f ./Dockerfile . \
             					sudo docker run --rm -d -p 5000:5000 --name ${CONT_NAME} ${IMG_NAME}:${MAJOR}.${MINOR}.${PATCH} \
-            					python3 selenium_location.py
+            					python3 selenium_location.py \
                     				MINOR=$((MINOR + 1))	
+                    				
                     			'''
 				}
 			}
@@ -79,12 +86,15 @@ pipeline {
     
 		stage('Push to DockerHub') {
 			steps {
+				withCredentials([usernamePassword(credentialsId: 'docker_hub', passwordVariable: 'PSWD', usernameVariable: 'LOGIN')]) {
 				script {
-					withCredentials([usernamePassword(credentialsId: 'docker_hub', passwordVariable: 'PSWD', usernameVariable: 'LOGIN')]) {
-					sh "sudo docker tag ${IMG_NAME} ${DOCKER_REPO}:${MAJOR}.${MINOR}.${PATCH}"
-					sh 'echo ${PSWD} | docker login -u ${LOGIN} --password-stdin'
-					sh "sudo docker push ${DOCKER_REPO}:${MAJOR}.${MINOR}.${PATCH}"
-
+				
+					sh '''
+						sudo docker tag ${IMG_NAME} ${DOCKER_REPO}:${MAJOR}.${MINOR}.${PATCH} \
+						echo ${PSWD} | docker login -u ${LOGIN} --password-stdin \
+						sudo docker push ${DOCKER_REPO}:${MAJOR}.${MINOR}.${PATCH} \
+						
+                    			'''
 					}
 				}	
 			}
@@ -92,17 +102,19 @@ pipeline {
               
 		stage('Deploy Helm Chart') {
 			when {branch 'main'}
-				steps {
-					withCredentials([file(credentialsId: 'master_kube_config', variable: 'KUBECONFIG')]) {
-					script {
-					// Deploy Helm chart
+			steps {
+				withCredentials([text(credentialsId: 'master_kube_config', variable: 'KUBECONFIG')]) {
+				script {
+				
+				// Deploy Helm chart
+				
 					sh '''
-					helm upgrade my-weather-app \
-					oci://registry-1.docker.io/talibro/weather \
-					--set image.weather.repository=${DOCKER_REPO},image.weather.tag=${IMG_TAG} \
-					--install \
-					--atomic \
-					--kubeconfig ${KUBECONFIG}
+						helm upgrade my-weather-app \
+						oci://registry-1.docker.io/talibro/weather_k8s \
+						--set image.weather.repository=${DOCKER_REPO},image.weather.tag=${IMG_TAG} \
+						--install \
+						--atomic \
+						--kubeconfig ${KUBECONFIG}
 					'''
 					}
 				}   		
@@ -121,8 +133,6 @@ pipeline {
    	 		}
 		}
               
-
-	
 	}
    	 
 	post {
@@ -130,7 +140,7 @@ pipeline {
 		script {
                     def buildNumber = currentBuild.number
                     slackSend(channel: 'succeeded-build', color: 'good', message: "Pipeline #${buildNumber} succeeded!")
-                    sh 'sudo docker kill weather_app'
+                    sh 'sudo docker kill ${CONT_NAME}'
                     sh 'yes | sudo docker container prune'
 
                 }
@@ -141,7 +151,7 @@ pipeline {
                     def buildNumber = currentBuild.number
                     def errorMessage = currentBuild.result
                     slackSend(channel: 'devops-alerts', color: 'danger', message: "Pipeline #${buildNumber} failed with error: ${errorMessage}")
-                    sh 'sudo docker kill weather_app'
+                    sh 'sudo docker kill ${CONT_NAME}'
                     sh 'yes | sudo docker container prune'
                 }
                 }
