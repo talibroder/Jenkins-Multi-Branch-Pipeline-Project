@@ -11,6 +11,7 @@ pipeline {
 	}
     
 	stages {
+	
 		stage('Read Version from S3') {	
             		steps {
             			withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'talibr-admin-aws', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
@@ -33,66 +34,94 @@ pipeline {
                			}
             		}
         	}
+        	
 		stage('Smoke test') {
 			when {branch 'develop'}
 			steps {
 				script {
 
-					sh 'sudo docker build -t ${IMG_NAME} .'
+					sh 'sudo docker build -t ${IMG_NAME}:${MAJOR}.${MINOR}.${PATCH} -f ./Dockerfile .'
+					sh 'sudo docker run --rm -d -p 5000:5000 --name ${CONT_NAME} ${IMG_NAME}:${MAJOR}.${MINOR}.${PATCH}'
+            				sh 'python3 unitest.py'
 					}
 				}
 		}
+		
+		stage('Hotfix test') {
+			when {branch 'hotfix'}
+			steps {
+				script {
+				        sh '''
+            					PATCH=$((PATCH + 1))
+                				echo ${PATCH}
+                				echo "${MAJOR}.${MINOR}.${PATCH}" > versioning.txt
+                				cat versioning.txt
+	
+                    			'''
+				}
+			}
+		}
+		
+		stage('Feature test'){
+			when {branch 'feature'}
+			steps {
+				script {
+				        sh '''
+                    				sudo docker build -t ${IMG_NAME}:${MAJOR}.${MINOR}.${PATCH} -f ./Dockerfile . \
+            					sudo docker run --rm -d -p 5000:5000 --name ${CONT_NAME} ${IMG_NAME}:${MAJOR}.${MINOR}.${PATCH} \
+            					python3 selenium_location.py
+                    				MINOR=$((MINOR + 1))	
+                    			'''
+				}
+			}
+		}
+				
+    
+		stage('Push to DockerHub') {
+			steps {
+				script {
+					withCredentials([usernamePassword(credentialsId: 'docker_hub', passwordVariable: 'PSWD', usernameVariable: 'LOGIN')]) {
+					sh "sudo docker tag ${IMG_NAME} ${DOCKER_REPO}:${MAJOR}.${MINOR}.${PATCH}"
+					sh 'echo ${PSWD} | docker login -u ${LOGIN} --password-stdin'
+					sh "sudo docker push ${DOCKER_REPO}:${MAJOR}.${MINOR}.${PATCH}"
 
-		stage('Run Docker image and test') {
-	steps {
-	script {
-		sh 'docker run --rm -d -p 80:80 --name weather_app ${IMG_NAME}'
-                sh 'python3 --version'
-                sh 'python3 unitest.py'
-                
-                }
-            }
-        }
-        
-        stage('Run Tests') {
-        steps {
-        // Run Selenium tests
-        script {
-               sh 'pip install selenium'
-               sh 'python3 selenium_location.py'
-               }
-             }
-             }
-
-	stage('Push to DockerHub') {
-	steps {
-	script {
-                withCredentials([usernamePassword(credentialsId: 'docker_hub', passwordVariable: 'PSWD', usernameVariable: 'LOGIN')]) {
-                        def buildNumber = currentBuild.number
-                        echo "Build Number: ${buildNumber}"
-                        echo "docker repo: ${DOCKER_REPO}"
-
-                	sh "docker tag ${IMG_NAME} ${DOCKER_REPO}:${buildNumber}"
-                        sh 'echo ${PSWD} | docker login -u ${LOGIN} --password-stdin'
-                        sh "docker push ${DOCKER_REPO}:${buildNumber}"
-
-              		}
-              }	
-              }
-              }
+					}
+				}	
+			}
+		}
               
-        stage('Deploy') {
-	steps {
-	script {
+		stage('Deploy Helm Chart') {
+			when {branch 'main'}
+				steps {
+					withCredentials([file(credentialsId: 'master_kube_config', variable: 'KUBECONFIG')]) {
+					script {
+					// Deploy Helm chart
+					sh '''
+					helm upgrade my-weather-app \
+					oci://registry-1.docker.io/talibro/weather \
+					--set image.weather.repository=${DOCKER_REPO},image.weather.tag=${IMG_TAG} \
+					--install \
+					--atomic \
+					--kubeconfig ${KUBECONFIG}
+					'''
+					}
+				}   		
+			}
+		}
+	
+	
+		stage('Update Versioning.txt in S3') {
+			steps {
+			withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'talibr-admin-aws', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+				script {
+					// Use AWS CLI to update the content of versioning.txt in S3
+					sh 'aws s3 cp versioning.txt s3://tali1992/versioning.txt'
+            				}
+        			}
+   	 		}
+		}
+              
 
-	withCredentials([sshUserPrivateKey(credentialsId: 'ssh_ip', keyFileVariable: 'SSH_KEY_PATH')]) {
-	sh "scp -o StrictHostKeyChecking=no -i ${SSH_KEY_PATH} nginx.conf ubuntu@16.171.230.105:/home/ubuntu"
-        sh "scp -o StrictHostKeyChecking=no -i ${SSH_KEY_PATH} docker-compose.yaml ubuntu@16.171.230.105:/home/ubuntu"
-        sh "ssh -o StrictHostKeyChecking=no -i ${SSH_KEY_PATH} ubuntu@16.171.230.105 'cd /home/ubuntu && docker pull ${DOCKER_REPO}:1.0.0 && sudo docker-compose up -d'"
-                    } 
-	}
-	}
-	}
 	
 	}
    	 
