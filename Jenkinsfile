@@ -88,13 +88,11 @@ pipeline {
 			steps {
 				withCredentials([usernamePassword(credentialsId: 'docker_hub', passwordVariable: 'PSWD', usernameVariable: 'LOGIN')]) {
 				script {
-				
-					sh '''
-						sudo docker tag ${IMG_NAME} ${DOCKER_REPO}:${MAJOR}.${MINOR}.${PATCH} \
-						echo ${PSWD} | docker login -u ${LOGIN} --password-stdin \
-						sudo docker push ${DOCKER_REPO}:${MAJOR}.${MINOR}.${PATCH} \
+
+						sh 'sudo docker tag ${IMG_NAME} ${DOCKER_REPO}:${MAJOR}.${MINOR}.${PATCH}'
+						sh 'echo ${PSWD} | docker login -u ${LOGIN} --password-stdin'
+						sh 'sudo docker push ${DOCKER_REPO}:${MAJOR}.${MINOR}.${PATCH}'
 						
-                    			'''
 					}
 				}	
 			}
