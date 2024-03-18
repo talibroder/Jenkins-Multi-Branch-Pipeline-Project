@@ -60,8 +60,10 @@ pipeline {
        						}
        						 
                         			else if (branchName.contains('feature')) {
-				   			sh "MINOR=$((MINOR + 1)) \
-                    					    echo "${MAJOR}.${MINOR}.${PATCH}" > versioning.txt"
+				   			sh ''' 
+				   			    MINOR=$((MINOR + 1)) \
+                    					    echo "${MAJOR}.${MINOR}.${PATCH}" > versioning.txt
+                    					'''
 						}
 					}
 				}
