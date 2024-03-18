@@ -8,8 +8,8 @@ pipeline {
 		IMG_NAME = 'weather'
 		DOCKER_REPO = 'talibro/weather'
 		CONT_NAME='Weatherapp'
-		GIT_PROJECT_ID = '1'
-		GITLAB_HOST = 'http://51.20.190.148'
+		GIT_PROJECT_ID = '3'
+		GITLAB_HOST = 'http://10.0.11.0'
 
 	}
     
