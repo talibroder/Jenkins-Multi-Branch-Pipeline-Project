@@ -96,6 +96,7 @@ pipeline {
 				script {
 
 						sh 'sudo docker tag ${IMG_NAME} ${DOCKER_REPO}:${MAJOR}.${MINOR}.${PATCH}'
+						sh 'sudo docker tag ${IMG_NAME} ${DOCKER_REPO}/${IMG_NAME}:latest'
 						sh 'echo ${PSWD} | docker login -u ${LOGIN} --password-stdin'
 						sh 'sudo docker push ${DOCKER_REPO}:${MAJOR}.${MINOR}.${PATCH}'
 						sh 'sudo docker push ${DOCKER_REPO}:latest'
