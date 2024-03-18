@@ -53,7 +53,6 @@ pipeline {
                        				if (branchName.contains('fix')) {
                        					sh '''
                        					    PATCH=$((PATCH + 1)) \
-                				            echo ${PATCH} \
                 					    echo "${MAJOR}.${MINOR}.${PATCH}" > versioning.txt
                 					'''
        						}
