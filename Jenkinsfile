@@ -110,7 +110,7 @@ pipeline {
 					sh '''
 						helm upgrade my-weather-app \
 						oci://registry-1.docker.io/talibro/weather_k8s \
-						--set image.weather.repository=${DOCKER_REPO},image.weather.tag=${IMG_TAG} \
+						--set image.weather.repository=${DOCKER_REPO},image.weather.tag=${MAJOR}.${MINOR}.${PATCH} \
 						--install \
 						--atomic \
 						--kubeconfig ${KUBECONFIG}
