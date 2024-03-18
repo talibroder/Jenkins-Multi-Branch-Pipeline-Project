@@ -70,7 +70,7 @@ pipeline {
        		stage('Create merge request') {
                 	when {not {branch 'main'}}
                		steps {
-               		        withCredentials([string(credentialsId: 'proj', variable: 'TOKEN')]) {
+               		        withCredentials([gitlabapi(credentialsId: 'proj', variable: 'TOKEN')]) {
 		                script {
 		                    def commitMsg = sh(script: "git log -1 --pretty=%B", returnStdout: true).trim()
 		                    sh "curl --request POST \
