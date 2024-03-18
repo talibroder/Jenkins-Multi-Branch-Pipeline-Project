@@ -32,17 +32,14 @@ pipeline {
         	}
         	
         	
-        	stage('build and testing') {
+        	stage('Docker build and run app') {
            		when {not {branch 'main'}}
 			steps {
 				script {
-				
-					sh '''
-						sudo docker build -t ${IMG_NAME}:${MAJOR}.${MINOR}.${PATCH} -f ./Dockerfile . \
-						sudo docker run --rm -d -p 5000:5000 --name ${CONT_NAME} ${IMG_NAME}:${MAJOR}.${MINOR}.${PATCH} \
-						python3 app_test.py \
-						python3 selenium_location.py
-            				'''
+						sh 'sudo docker build -t ${IMG_NAME}:${MAJOR}.${MINOR}.${PATCH} -f ./Dockerfile .'
+						sh 'sudo docker run --rm -d -p 5000:5000 --name ${CONT_NAME} ${IMG_NAME}:${MAJOR}.${MINOR}.${PATCH}'
+						sh 'python3 app_test.py'
+						sh 'python3 selenium_location.py'
 					}
 					
 				}
