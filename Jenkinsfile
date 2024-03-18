@@ -38,10 +38,12 @@ pipeline {
            		when {not {branch 'main'}}
 			steps {
 				script {
+						echo "1"
 						sh 'sudo docker build -t ${IMG_NAME}:${MAJOR}.${MINOR}.${PATCH} -f ./Dockerfile .'
 						sh 'sudo docker run --rm -d -p 5000:5000 --name ${CONT_NAME} ${IMG_NAME}:${MAJOR}.${MINOR}.${PATCH}'
 						sh 'python3 app_test.py'
 						sh 'python3 selenium_location.py'
+						echo "2"
 					}
 					
 				}
