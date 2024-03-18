@@ -84,10 +84,11 @@ pipeline {
 				        remove_source_branch: true // Optional: Remove source branch after merge
 				    ]
                     
-				    def response = gitlabApi(
-				        apiToken: env.GITLAB_API_TOKEN,
-				        httpMode: 'POST',
-				        apiUrl: apiUrl,
+				    def response = gitlab(
+				        credentialsId: env.GITLAB_API_TOKEN,
+				        apiEndpoint: env.GITLAB_HOST,
+				        method: 'POST',
+				        path: apiUrl,
 				        requestBody: requestBody
 				    )
                     
