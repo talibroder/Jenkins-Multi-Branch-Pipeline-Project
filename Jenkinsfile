@@ -20,9 +20,8 @@ pipeline {
             			withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'talibr-admin-aws', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
 		        		script {
 		        			// Download and read the content of versioning.txt from S3
-		        			sh 'aws s3 cp s3://tali1992/versioning.txt versioning.txt'
+		        			sh 'aws s3 cp s3://weatherversion/versioning.txt versioning.txt'
 		        			def s3Content = readFile 'versioning.txt'
-		        			sh 'cat versioning.txt'
 
 		        			// Split the content by dot ('.') and set each part as an environment variable
 		        			def versionParts = s3Content.split('\\.')
@@ -39,12 +38,10 @@ pipeline {
            		when {not {branch 'main'}}
 			steps {
 				script {
-						echo "1"
 						sh 'sudo docker build -t ${IMG_NAME}:${MAJOR}.${MINOR}.${PATCH} -f ./Dockerfile .'
 						sh 'sudo docker run --rm -d -p 5000:5000 --name ${CONT_NAME} ${IMG_NAME}:${MAJOR}.${MINOR}.${PATCH}'
 						sh 'python3 app_test.py'
 						sh 'python3 selenium_location.py'
-						echo "2"
 					}
 					
 				}
@@ -56,6 +53,7 @@ pipeline {
                        				if (branchName.contains('fix')) {
                        					sh '''
                        					    PATCH=$((PATCH + 1)) \
+                				            echo ${PATCH} \
                 					    echo "${MAJOR}.${MINOR}.${PATCH}" > versioning.txt
                 					'''
        						}
@@ -134,7 +132,7 @@ pipeline {
 			withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'talibr-admin-aws', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
 				script {
 					// Use AWS CLI to update the content of versioning.txt in S3
-					sh 'aws s3 cp versioning.txt s3://tali1992/versioning.txt'
+					sh 'aws s3 cp versioning.txt s3://weatherversion/versioning.txt'
             				}
         			}
    	 		}
