@@ -1,0 +1,62 @@
+#!/bin/bash
+
+echo "Beginning pre-commit checks..."
+
+# Perform secret scanning
+echo "Running secret scan using 'git secrets':"
+secret_scan_output=$(git secrets --pre_commit_hook -- "$@")
+
+# Check if git secrets found any secrets
+if [[ -n "$secret_scan_output" ]]; then
+  echo "Git secrets found potential secrets. Please review the output above and address any concerns."
+  exit 1
+else
+  echo "No secrets detected by git secrets."
+fi
+
+echo "---------"
+
+echo "Running safety check"
+
+# Run safety check and capture the output
+safety_output=$(safety check)
+
+# Count the total number of vulnerabilities
+vulnerability_count=$(grep -c 'Vulnerability found in' <<< "$safety_output")
+
+# Define the threshold (e.g., 0 critical vulnerabilities allowed)
+threshold=70
+
+# Check if any vulnerabilities are found
+if [ "$vulnerability_count" -gt "$threshold" ]; then
+    echo "$vulnerability_count Vulnerabilities found. Commit failed."
+    exit 1
+else
+	echo "Safety check passed."
+fi
+
+echo "--------"
+
+echo "Running container scan"
+
+# Specify a log file to capture the trivy output
+log_file="trivy_scan.log"
+
+# Run Trivy scan and redirect the output to the log file
+
+/usr/local/bin/trivy filesystem /home/tali/Desktop/gitlab/weather/Dockerfile > "$log_file" 2>&1
+
+
+# Check Trivy's exit code to determine success or failure
+if [[ $? -ne 0 ]]; then
+  echo "Container scan failed. Please refer to the logs for details."
+  # Print the contents of the log file
+  cat "$log_file"
+  exit 1
+else
+  echo "Container scan passed."
+fi
+
+echo "--------"
+
+exit 0

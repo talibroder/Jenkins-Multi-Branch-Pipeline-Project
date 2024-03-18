@@ -5,9 +5,10 @@ pipeline {
 	}
     
 	environment {
-	IMG_NAME = 'weather'
-        DOCKER_REPO = 'talibro/weather'
-        CONT_NAME='Weatherapp'
+		IMG_NAME = 'weather'
+		DOCKER_REPO = 'talibro/weather'
+		CONT_NAME='Weatherapp'
+		GIT_PROJECT_ID = '1'
 	}
     
 	stages {
@@ -15,76 +16,80 @@ pipeline {
 		stage('Read Version from S3') {	
             		steps {
             			withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'talibr-admin-aws', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
-                		script {
-                			// Download versioning.txt from S3
-                			echo "doneeee"
-                			sh 'aws s3 cp s3://tali1992/versioning.txt versioning.txt'
+		        		script {
+		        			// Download and read the content of versioning.txt from S3
+		        			sh 'aws s3 cp s3://tali1992/versioning.txt versioning.txt'
+		        			def s3Content = readFile 'versioning.txt'
 
-                			// Read the content of versioning.txt
-                			def s3Content = readFile 'versioning.txt'
-
-                			// Split the content by dot ('.')
-                			def versionParts = s3Content.split('\\.')
-
-                			// Set each part as an environment variable
-                			env.MAJOR = versionParts[0].trim().toInteger()
-                			env.MINOR = versionParts[1].trim().toInteger()
-                			env.PATCH = versionParts[2].trim().toInteger()
-                		}
+		        			// Split the content by dot ('.') and set each part as an environment variable
+		        			def versionParts = s3Content.split('\\.')
+		        			env.MAJOR = versionParts[0].trim().toInteger()
+		        			env.MINOR = versionParts[1].trim().toInteger()
+		        			env.PATCH = versionParts[2].trim().toInteger()
+		        		}
                			}
             		}
         	}
         	
-         	
-		stage('Smoke test') {
-			when {branch 'develop'}
+        	
+        	stage('build and testing') {
+           		when {not {branch 'main'}}
 			steps {
 				script {
 				
 					sh '''
 						sudo docker build -t ${IMG_NAME}:${MAJOR}.${MINOR}.${PATCH} -f ./Dockerfile . \
 						sudo docker run --rm -d -p 5000:5000 --name ${CONT_NAME} ${IMG_NAME}:${MAJOR}.${MINOR}.${PATCH} \
-            					python3 unitest.py
-            					
+						python3 app_test.py \
+						python3 selenium_location.py
             				'''
-            				
+					}
+					
+				}
+				
+			post {
+				success {
+					script {
+						def branchName = env.BRANCH_NAME.toLowerCase()
+                       				if (branchName.contains('fix')) {
+                       					sh '''	
+            							PATCH=$((PATCH + 1)) \
+                						echo ${PATCH} \
+                						echo "${MAJOR}.${MINOR}.${PATCH}" > versioning.txt
+                					'''
+       						}
+       						 
+                        			else if (branchName.contains('feature')) {
+				   			sh '''
+                    						MINOR=$((MINOR + 1)) \
+                    						echo "${MAJOR}.${MINOR}.${PATCH}" > versioning.txt
+                    					'''
+						}
 					}
 				}
-		}
-		
-		stage('Hotfix test') {
-			when {branch 'hotfix'}
-			steps {
-				script {
-				
-				        sh '''
-            					PATCH=$((PATCH + 1)) \
-                				echo ${PATCH} \
-                				echo "${MAJOR}.${MINOR}.${PATCH}" > versioning.txt \
-                				cat versioning.txt \
-	
-                    			'''
-				}
-			}
-		}
-		
-		stage('Feature test'){
-			when {branch 'feature'}
-			steps {
-				script {
-				
-				        sh '''
-                    				sudo docker build -t ${IMG_NAME}:${MAJOR}.${MINOR}.${PATCH} -f ./Dockerfile . \
-            					sudo docker run --rm -d -p 5000:5000 --name ${CONT_NAME} ${IMG_NAME}:${MAJOR}.${MINOR}.${PATCH} \
-            					python3 selenium_location.py \
-                    				MINOR=$((MINOR + 1))	
-                    				
-                    			'''
-				}
-			}
-		}
-				
-    
+                	}
+                }
+
+       		stage('Create merge request') {
+                	when {not {branch 'main'}}
+               		steps {
+               		        withCredentials([string(credentialsId: 'merge-request-token', variable: 'TOKEN')]) {
+		                script {
+		                    def commitMsg = sh(script: "git log -1 --pretty=%B", returnStdout: true).trim()
+		                    sh "curl --request POST \
+		                        --header 'PRIVATE-TOKEN: ${TOKEN}' \
+		                        --data-urlencode 'source_branch=${env.BRANCH_NAME}' \
+		                        --data-urlencode 'target_branch=main' \
+		                        --data-urlencode 'title=MR-${commitMsg}' \
+		                        --data-urlencode 'description=${commitMsg}' \
+		                        '${GITLAB_HOST}/api/v4/projects/${GIT_PROJECT_ID}/merge_requests'"
+		                	}
+		                }
+                        }
+                 }
+
+                    
+                      
 		stage('Push to DockerHub') {
 			steps {
 				withCredentials([usernamePassword(credentialsId: 'docker_hub', passwordVariable: 'PSWD', usernameVariable: 'LOGIN')]) {
@@ -93,6 +98,7 @@ pipeline {
 						sh 'sudo docker tag ${IMG_NAME} ${DOCKER_REPO}:${MAJOR}.${MINOR}.${PATCH}'
 						sh 'echo ${PSWD} | docker login -u ${LOGIN} --password-stdin'
 						sh 'sudo docker push ${DOCKER_REPO}:${MAJOR}.${MINOR}.${PATCH}'
+						sh 'sudo docker push ${DOCKER_REPO}:latest'
 						
 					}
 				}	
