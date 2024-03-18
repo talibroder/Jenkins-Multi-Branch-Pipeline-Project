@@ -35,6 +35,7 @@ pipeline {
             		}
         	}
         	
+         	
 		stage('Smoke test') {
 			when {branch 'develop'}
 			steps {
@@ -101,7 +102,7 @@ pipeline {
 		stage('Deploy Helm Chart') {
 			when {branch 'main'}
 			steps {
-				withCredentials([text(credentialsId: 'master_kube_config', variable: 'KUBECONFIG')]) {
+				withCredentials([file(credentialsId: 'master_kube_config', variable: 'KUBECONFIG')]) {
 				script {
 				
 				// Deploy Helm chart
