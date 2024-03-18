@@ -22,6 +22,7 @@ pipeline {
 		        			// Download and read the content of versioning.txt from S3
 		        			sh 'aws s3 cp s3://tali1992/versioning.txt versioning.txt'
 		        			def s3Content = readFile 'versioning.txt'
+		        			sh 'cat versioning.txt'
 
 		        			// Split the content by dot ('.') and set each part as an environment variable
 		        			def versionParts = s3Content.split('\\.')
