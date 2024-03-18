@@ -52,18 +52,14 @@ pipeline {
 					script {
 						def branchName = env.BRANCH_NAME.toLowerCase()
                        				if (branchName.contains('fix')) {
-                       					sh '''	
-            							PATCH=$((PATCH + 1)) \
-                						echo ${PATCH} \
-                						echo "${MAJOR}.${MINOR}.${PATCH}" > versioning.txt
-                					'''
+                       					sh "PATCH=$((PATCH + 1)) \
+                				            echo ${PATCH} \
+                					    echo "${MAJOR}.${MINOR}.${PATCH}" > versioning.txt"
        						}
        						 
                         			else if (branchName.contains('feature')) {
-				   			sh '''
-                    						MINOR=$((MINOR + 1)) \
-                    						echo "${MAJOR}.${MINOR}.${PATCH}" > versioning.txt
-                    					'''
+				   			sh "MINOR=$((MINOR + 1)) \
+                    					    echo "${MAJOR}.${MINOR}.${PATCH}" > versioning.txt"
 						}
 					}
 				}
