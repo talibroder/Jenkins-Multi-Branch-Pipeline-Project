@@ -10,7 +10,7 @@ pipeline {
 		CONT_NAME = 'Weatherapp'
 		HELM_REPO = 'talibro/weather_k8s'
 		GIT_PROJECT_ID = '3'
-       		GITLAB_HOST = 'http://13.60.14.10'
+       		GITLAB_HOST = 'https://172.31.19.250'
 		GITLAB_API_TOKEN = credentials('merge-request-token')
 
 
