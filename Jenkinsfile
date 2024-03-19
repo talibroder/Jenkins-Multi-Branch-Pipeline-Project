@@ -81,7 +81,7 @@ pipeline {
 		            	withCredentials([string(credentialsId: 'merge-request-token', variable: 'TOKEN')]) {
 		                	script {
 				            def commitMsg = sh(script: "git log -1 --pretty=%B", returnStdout: true).trim()
-				            echo'${TOKEN}'
+				            echo "${TOKEN}"
 				            sh "curl --request POST \
 				                --header 'PRIVATE-TOKEN: ${TOKEN}' \
 				                --data-urlencode 'source_branch=${env.BRANCH_NAME}' \
