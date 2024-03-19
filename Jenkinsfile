@@ -7,7 +7,8 @@ pipeline {
 	environment {
 		IMG_NAME = 'weather'
 		DOCKER_REPO = 'talibro/weather'
-		CONT_NAME='Weatherapp'
+		CONT_NAME = 'Weatherapp'
+		HELM_REPO = 'talibro/weather_k8s'
 		GIT_PROJECT_ID = '3'
 		GITLAB_HOST = 'http://51.20.190.148'
 		GITLAB_API_TOKEN = credentials('merge-request-token')
@@ -129,7 +130,7 @@ pipeline {
 				
 					sh '''
 						helm upgrade my-weather-app \
-						oci://registry-1.docker.io/talibro/weather_k8s \
+						oci://registry-1.docker.io/${HELM_REPO} \
 						--set image.weather.repository=${DOCKER_REPO},image.weather.tag=${MAJOR}.${MINOR}.${PATCH} \
 						--install \
 						--atomic \
