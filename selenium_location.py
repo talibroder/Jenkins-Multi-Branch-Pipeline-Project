@@ -1,3 +1,5 @@
+#verify whether the app correctly displays information based on user input
+
 import time
 
 from selenium import webdriver
