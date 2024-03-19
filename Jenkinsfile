@@ -82,7 +82,7 @@ pipeline {
 		                	script {
 				            def commitMsg = sh(script: "git log -1 --pretty=%B", returnStdout: true).trim()
 				            sh "curl --request POST \
-				            	echo "1"
+				            	echo "1" \
 				                --header 'PRIVATE-TOKEN: ${TOKEN}' \
 				                --data-urlencode 'source_branch=${env.BRANCH_NAME}' \
 				                --data-urlencode 'target_branch=main' \
