@@ -62,7 +62,7 @@ The pipeline integrates with a Slack channel for real-time notifications.
   - Type: `Secret text`
   - Secret: `<Your Slack Channel API Token>`
 
-### 7. Pipeline Environment Variable Configuration
+### 8. Pipeline Environment Variable Configuration
 
 - Pipeline environment variables set according to the user specific needs:
   - `IMG_NAME` - Name of your web-app Docker image.
@@ -71,7 +71,7 @@ The pipeline integrates with a Slack channel for real-time notifications.
   - `GITLAB_HOST` - URL of your GitLab server (currenly http only)
   - `GIT_PROJECT_ID` - GitLab project ID
 
-### 8. Save Pre-commit Script
+### 9. Save Pre-commit Script
   - Save the *pre-commit* script in the local repo `.git/hooks` folder for the pipeline versioning system to work properly.
 
 
