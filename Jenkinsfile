@@ -10,7 +10,7 @@ pipeline {
 		CONT_NAME = 'Weatherapp'
 		HELM_REPO = 'talibro/weather_k8s'
 		GIT_PROJECT_ID = '3'
-       		GITLAB_HOST = 'http://10.0.11.0'
+       		GITLAB_HOST = 'http://172.31.19.250'
 		GITLAB_API_TOKEN = credentials('merge-request-token')
 
 
@@ -82,7 +82,6 @@ pipeline {
 		                	script {
 				            def commitMsg = sh(script: "git log -1 --pretty=%B", returnStdout: true).trim()
 				            sh "curl --request POST \
-				            	echo "1" \
 				                --header 'PRIVATE-TOKEN: ${TOKEN}' \
 				                --data-urlencode 'source_branch=${env.BRANCH_NAME}' \
 				                --data-urlencode 'target_branch=main' \
