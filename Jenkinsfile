@@ -73,34 +73,25 @@ pipeline {
                 	}
                 }
 
+
+
        		stage('Create merge request') {
-                	when {not {branch 'main'}}
-               		steps {
-		                script {
-		                    def apiUrl = "https://gitlab.com/api/v4/projects/${env.GITLAB_PROJECT_ID}/merge_requests"
-				    def requestBody = [
-				        title: 'Your merge request title',
-				        source_branch: 'feature-change-title', // Replace with your source branch
-				        target_branch: 'main', // Replace with your target branch
-				        remove_source_branch: true // Optional: Remove source branch after merge
-				    ]
-                    
-				    def response = gitlab(
-				        credentialsId: env.GITLAB_API_TOKEN,
-				        apiEndpoint: env.GITLAB_HOST,
-				        method: 'POST',
-				        path: apiUrl,
-				        requestBody: requestBody
-				    )
-                    
-				    if (response.status == 201) {
-				        echo 'Merge request created successfully!'
-				    } else {
-				        error "Failed to create merge request: ${response.content}"
-				    }
-						}
-                        }
-                 }
+              		when {not {branch 'main'}}
+                	steps {
+		            	withCredentials([string(credentialsId: 'merge-request-token', variable: 'TOKEN')]) {
+		                	script {
+				            def commitMsg = sh(script: "git log -1 --pretty=%B", returnStdout: true).trim()
+				            sh "curl --request POST \
+				                --header 'PRIVATE-TOKEN: ${TOKEN}' \
+				                --data-urlencode 'source_branch=${env.BRANCH_NAME}' \
+				                --data-urlencode 'target_branch=main' \
+				                --data-urlencode 'title=MR-${commitMsg}' \
+				                --data-urlencode 'description=${commitMsg}' \
+				                '${GITLAB_HOST}/api/v4/projects/${GIT_PROJECT_ID}/merge_requests'"
+				            }
+		                }
+                       }
+               }
 
                     
                       
