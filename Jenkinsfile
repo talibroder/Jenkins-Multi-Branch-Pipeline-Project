@@ -12,8 +12,6 @@ pipeline {
 		GIT_PROJECT_ID = '3'
        		GITLAB_HOST = 'http://172.31.19.250'
 		GITLAB_API_TOKEN = credentials('merge-request-token')
-
-
 	}
     
 	stages {
