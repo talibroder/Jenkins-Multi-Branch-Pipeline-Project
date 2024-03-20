@@ -43,6 +43,7 @@ pipeline {
 						sh 'sudo docker run --rm -d -p 5000:5000 --name ${CONT_NAME} ${IMG_NAME}:${MAJOR}.${MINOR}.${PATCH}'
 						sh 'python3 app_test.py'
 						sh 'python3 selenium_location.py'
+
 					}
 					
 				}
@@ -65,9 +66,21 @@ pipeline {
                     					    echo "${MAJOR}.${MINOR}.${PATCH}" > versioning.txt
                     					'''
 						}
+						
+						def buildNumber = currentBuild.number
+						slackSend(channel: 'succeeded-build', color: 'good', message: "Pipeline #${buildNumber} succeeded!")		
 					}
 				}
-                	}
+				
+				failure {
+				
+					script {
+						def buildNumber = currentBuild.number
+						def errorMessage = currentBuild.result
+						slackSend(channel: 'devops-alerts', color: 'danger', message: "Pipeline #${buildNumber} failed with error: ${errorMessage}")
+						}
+					}
+				}
                 }
 
 
@@ -103,6 +116,8 @@ pipeline {
 						sh 'echo ${PSWD} | docker login -u ${LOGIN} --password-stdin'
 						sh 'sudo docker push ${DOCKER_REPO}:${MAJOR}.${MINOR}.${PATCH}'
 						sh 'sudo docker push ${DOCKER_REPO}:latest'
+						sh 'sudo docker kill ${CONT_NAME}'
+						sh 'yes | sudo docker container prune'
 						
 					}
 				}	
@@ -147,23 +162,13 @@ pipeline {
 	post {
 		success {
 		script {
-                    def buildNumber = currentBuild.number
-                    slackSend(channel: 'succeeded-build', color: 'good', message: "Pipeline #${buildNumber} succeeded!")
-                   //sh 'sudo docker kill ${CONT_NAME}'
-                    //sh 'yes | sudo docker container prune'
+                    
+
 
                 }
                 }
             
-		failure {
-		script {
-                    def buildNumber = currentBuild.number
-                    def errorMessage = currentBuild.result
-                    slackSend(channel: 'devops-alerts', color: 'danger', message: "Pipeline #${buildNumber} failed with error: ${errorMessage}")
-                    //sh 'sudo docker kill ${CONT_NAME}'
-                    //sh 'yes | sudo docker container prune'
-                }
-                }
+
 
         }
         }
