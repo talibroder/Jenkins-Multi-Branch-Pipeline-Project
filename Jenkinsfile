@@ -158,18 +158,4 @@ pipeline {
 		}
               
 	}
-   	 
-	post {
-		success {
-		script {
-                    
-
-
-                }
-                }
-            
-
-
-        }
-        }
-        
+}
