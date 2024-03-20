@@ -107,6 +107,7 @@ pipeline {
                     
                       
 		stage('Push to DockerHub') {
+			when {not {branch 'main'}}
 			steps {
 				withCredentials([usernamePassword(credentialsId: 'docker_hub', passwordVariable: 'PSWD', usernameVariable: 'LOGIN')]) {
 				script {
