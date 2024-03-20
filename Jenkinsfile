@@ -16,6 +16,14 @@ pipeline {
     
 	stages {
 	
+		stage('SonarQube Analysis') {
+  			def scannerHome = tool 'SonarScanner';
+    				withSonarQubeEnv() {
+      					sh "${scannerHome}/bin/sonar-scanner"
+    				}
+  		}
+  		
+  		
 		stage('Read Version from S3') {	
             		steps {
             			withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'talibr-admin-aws', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
