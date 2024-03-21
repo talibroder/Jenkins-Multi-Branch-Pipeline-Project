@@ -23,6 +23,23 @@ pipeline {
     				}
   		}
   		
+  		stage('SonarQube Analysis') {
+			steps {
+				script {
+				def scannerHome = tool 'SonarScanner'	
+				withSonarQubeEnv('SonarQubeServer') {
+					withCredentials([string(credentialsId: '	sonar_jen', variable: 'SONAR_TOKEN')]) {
+                            sh """
+                            ${scannerHome}/bin/sonar-scanner \
+                            -Dsonar.projectKey=root_weather_AY5bnNV8RFxNxlYpTjHn \
+                            """
+                        }
+				sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=myProject -Dsonar.sources=src"
+                    }
+                }
+            }
+        }
+  		
   		
 		stage('Read Version from S3') {	
             		steps {
