@@ -15,25 +15,7 @@ pipeline {
 	}
     
 	stages {
-	
-  		
-  		stage('SonarQube Analysis') {
-			steps {
-				script {
-				def scannerHome = tool 'SonarQube'	
-				withSonarQubeEnv('SonarQubeServer') {
-					withCredentials([string(credentialsId: 'sonar_jen', variable: 'SONAR_TOKEN')]) {
-				            sh """
-				            ${scannerHome}/bin/sonar-scanner \
-				            -Dsonar.projectKey=root_weather_AY5bnNV8RFxNxlYpTjHn \
-				            """
-                        		}
-                    		}
-                		}
-           		 }
-        	}
-  		
-  		
+		
 		stage('Read Version from S3') {	
             		steps {
             			withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'talibr-admin-aws', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
